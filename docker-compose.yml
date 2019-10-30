@@ -9,6 +9,7 @@ services:
       - DATASTOREDB_HOST=datastore
       - DATASTOREDB_PROJECT=project-test
       - DATASTOREDB_PORT=8081
+      - DEVMODE=true
     build:
       context: .
       dockerfile: DemoUserSaveAPI/Dockerfile

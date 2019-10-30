@@ -32,6 +32,7 @@ namespace DemoUserSaveAPI
 
             var host = Configuration.GetValue<string>("EMULATOR_HOST");
             var project = Configuration.GetValue<string>("PROJECT_ID");
+            var devMode = !string.IsNullOrWhiteSpace(Configuration.GetValue<string>("DEVMODE"));
 
             var configData = new Dictionary<string, object>();
             foreach (var config in Configuration.AsEnumerable())
@@ -42,9 +43,17 @@ namespace DemoUserSaveAPI
             services.AddTransient<IUserProfileService, UserProfileService>();// ((s) => new UserProfileService(host, project));
             services.AddTransient<ITaskThreadManagementService, TaskThreadManagementService>();
             services.AddTransient<IUserProfileRepository, UserProfileRepository>();
-            services.AddTransient<IDataEntityObjectFactory, DataEntityObjectFactory>();
-            services.AddTransient<IDataAccessProvider, DatastoreDbProvider>();
+            services.AddTransient<IDataEntityObjectFactory, DataEntityObjectFactory>();             
             services.AddTransient<IConfigurationService, ApiConfigurationService>((s) => new ApiConfigurationService(configData));
+
+            if (devMode)
+            {
+                services.AddTransient<IDataAccessProvider, EmulatedDatastoreDbProvider>();
+            }
+            else
+            {
+                services.AddTransient<IDataAccessProvider, DatastoreDbProvider>();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,7 +73,7 @@ namespace DemoUserSaveAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });        
+            });     
         }
     }
 }

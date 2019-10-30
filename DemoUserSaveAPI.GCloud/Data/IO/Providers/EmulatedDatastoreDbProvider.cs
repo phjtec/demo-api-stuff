@@ -9,16 +9,21 @@ using Grpc.Core;
 
 namespace DemoUserSaveAPI.GCloud.Data.IO.Providers
 {
-    public class DatastoreDbProvider : IDataAccessProvider
+    public class EmulatedDatastoreDbProvider : IDataAccessProvider
     {
         private readonly DatastoreDb _db;
         private readonly IDataEntityObjectFactory _dataEntityObjectFactory;
 
-        public DatastoreDbProvider(IConfigurationService configurationService, IDataEntityObjectFactory dataEntityObjectFactory)
+        public EmulatedDatastoreDbProvider(IConfigurationService configurationService, IDataEntityObjectFactory dataEntityObjectFactory)
         {
+            var host = configurationService.Get("DATASTOREDB_HOST");
             var project = configurationService.Get("DATASTOREDB_PROJECT");
+            var port = Convert.ToInt32(configurationService.Get("DATASTOREDB_PORT"));
 
-            _db = DatastoreDb.Create(project);
+            var channel = new Channel(host, port, ChannelCredentials.Insecure);
+            var client = DatastoreClient.Create(channel); 
+
+            _db = DatastoreDb.Create(project, "", client);
             _dataEntityObjectFactory = dataEntityObjectFactory;
         }
 
